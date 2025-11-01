@@ -63,7 +63,6 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchAdvocates = useCallback(async (search: string = "", years: string = "all", title: string = "all", page: number = 1) => {
     const startTime = Date.now();
@@ -130,74 +129,47 @@ export default function Home() {
     }
   }, []);
 
+  const triggerFetch = useCallback((newSearch: string, newYears: string, newTitle: string, newPage: number, newSort: string) => {
+    setSearchTerm(newSearch);
+    setYearsFilter(newYears);
+    setTitleFilter(newTitle);
+    setSortBy(newSort);
+    setCurrentPage(newPage);
+  }, []);
+
   useEffect(() => {
-    fetchAdvocates(searchTerm, yearsFilter, titleFilter, currentPage).then((result) => {
-      const sorted = sortAdvocates(result.advocates || [], sortBy);
-      setFilteredAdvocates(sorted);
-      setTotalPages(result.pagination.totalPages);
-      setTotalResults(result.pagination.total);
-    });
-  }, [fetchAdvocates, searchTerm, yearsFilter, titleFilter, currentPage, sortBy]);
-
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSearchTerm = e.target.value;
-    setSearchTerm(newSearchTerm);
-    setCurrentPage(1);
-
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
-      fetchAdvocates(newSearchTerm, yearsFilter, titleFilter, 1).then((result) => {
+      fetchAdvocates(searchTerm, yearsFilter, titleFilter, currentPage).then((result) => {
         const sorted = sortAdvocates(result.advocates || [], sortBy);
         setFilteredAdvocates(sorted);
         setTotalPages(result.pagination.totalPages);
         setTotalResults(result.pagination.total);
       });
-    }, 800);
+    }, searchTerm !== "" ? 800 : 0);
+  }, [fetchAdvocates, searchTerm, yearsFilter, titleFilter, currentPage, sortBy]);
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    triggerFetch(e.target.value, yearsFilter, titleFilter, 1, sortBy);
   };
 
   const onYearsFilterChange = (value: string) => {
-    setYearsFilter(value);
-    setCurrentPage(1);
-    fetchAdvocates(searchTerm, value, titleFilter, 1).then((result) => {
-      const sorted = sortAdvocates(result.advocates || [], sortBy);
-      setFilteredAdvocates(sorted);
-      setTotalPages(result.pagination.totalPages);
-      setTotalResults(result.pagination.total);
-    });
+    triggerFetch(searchTerm, value, titleFilter, 1, sortBy);
   };
 
   const onTitleFilterChange = (value: string) => {
-    setTitleFilter(value);
-    setCurrentPage(1);
-    fetchAdvocates(searchTerm, yearsFilter, value, 1).then((result) => {
-      const sorted = sortAdvocates(result.advocates || [], sortBy);
-      setFilteredAdvocates(sorted);
-      setTotalPages(result.pagination.totalPages);
-      setTotalResults(result.pagination.total);
-    });
+    triggerFetch(searchTerm, yearsFilter, value, 1, sortBy);
   };
 
   const onSortByChange = (value: string) => {
-    setSortBy(value);
-    const sorted = sortAdvocates(filteredAdvocates, value);
-    setFilteredAdvocates(sorted);
+    triggerFetch(searchTerm, yearsFilter, titleFilter, currentPage, value);
   };
 
   const onReset = () => {
-    setSearchTerm("");
-    setYearsFilter("all");
-    setTitleFilter("all");
-    setSortBy("name-asc");
-    setCurrentPage(1);
-    fetchAdvocates("", "all", "all", 1).then((result) => {
-      const sorted = sortAdvocates(result.advocates || [], "name-asc");
-      setFilteredAdvocates(sorted);
-      setTotalPages(result.pagination.totalPages);
-      setTotalResults(result.pagination.total);
-    });
+    triggerFetch("", "all", "all", 1, "name-asc");
   };
 
   const handlePageChange = (newPage: number) => {
