@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { AdvocateResults } from './advocate-results';
+import { AdvocateResults } from '../advocate-results';
 import { Advocate } from '@/types';
 
 describe('AdvocateResults', () => {

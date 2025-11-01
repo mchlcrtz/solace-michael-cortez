@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ProviderCard } from './provider-card';
-import { TooltipProvider } from './ui/tooltip';
+import { ProviderCard } from '../provider-card';
+import { TooltipProvider } from '../ui/tooltip';
 
 const renderWithTooltipProvider = (component: React.ReactElement) => {
   return render(<TooltipProvider>{component}</TooltipProvider>);
