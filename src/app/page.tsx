@@ -3,8 +3,10 @@
 import styled from "styled-components";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Advocate } from "@/types";
-import { AdvocateSearch } from "@/components/advocate-search";
 import { AdvocateResults } from "@/components/advocate-results";
+import { PageHeader } from "@/components/page-header";
+import { Pagination } from "@/components/pagination";
+import { sortAdvocates } from "@/lib/advocate-utils";
 
 const Main = styled.main`
   display: flex;
@@ -36,62 +38,6 @@ const Container = styled.div`
   }
 `;
 
-const HeaderSection = styled.div`
-  padding: 1rem;
-  flex-shrink: 0;
-  
-  @media (min-width: 768px) {
-    padding: 2rem 1rem;
-  }
-`;
-
-const TitleSection = styled.div`
-  margin-bottom: 1rem;
-  
-  @media (min-width: 768px) {
-    margin-bottom: 2rem;
-  }
-`;
-
-const Title = styled.h1`
-  font-size: 1.875rem;
-  line-height: 1.2;
-  font-weight: 700;
-  color: hsl(var(--foreground));
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.02em;
-  font-family: var(--font-sans);
-  
-  @media (min-width: 768px) {
-    font-size: 2.5rem;
-  }
-`;
-
-const Description = styled.p`
-  color: hsl(var(--muted-foreground));
-  font-size: 1rem;
-  line-height: 1.5rem;
-  font-weight: 400;
-  font-family: var(--font-sans);
-  
-  @media (min-width: 768px) {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-  }
-`;
-
-const StickySearchContainer = styled.div`
-  position: sticky;
-  top: 0;
-  background-color: hsl(var(--background));
-  z-index: 10;
-  padding-bottom: 1rem;
-  
-  @media (min-width: 768px) {
-    padding-bottom: 0.5rem;
-  }
-`;
-
 const ContentSection = styled.div`
   padding: 1rem;
   padding-bottom: 1rem;
@@ -103,43 +49,6 @@ const ContentSection = styled.div`
   @media (min-width: 768px) {
     padding: 2rem;
   }
-`;
-
-const PaginationContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
-  padding: 1rem;
-`;
-
-const PaginationButton = styled.button<{ $active?: boolean; $disabled?: boolean }>`
-  padding: 0.5rem 1rem;
-  border: 1px solid hsl(var(--border));
-  background-color: ${props => props.$active ? 'hsl(var(--primary))' : 'hsl(var(--background))'};
-  color: ${props => props.$active ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))'};
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
-  opacity: ${props => props.$disabled ? '0.5' : '1'};
-  transition: all 0.2s;
-  
-  &:hover:not(:disabled) {
-    background-color: ${props => props.$active ? 'hsl(var(--primary))' : 'hsl(var(--accent))'};
-    opacity: 1;
-  }
-  
-  &:disabled {
-    cursor: not-allowed;
-  }
-`;
-
-const PaginationInfo = styled.span`
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  margin: 0 1rem;
 `;
 
 export default function Home() {
@@ -221,33 +130,6 @@ export default function Home() {
     }
   }, []);
 
-  function sortAdvocates(advocates: Advocate[], sortOption: string): Advocate[] {
-    const sorted = [...advocates];
-    
-    switch (sortOption) {
-      case "name-asc":
-        return sorted.sort((a, b) => {
-          const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
-          const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-          return nameA.localeCompare(nameB);
-        });
-      case "name-desc":
-        return sorted.sort((a, b) => {
-          const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
-          const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-          return nameB.localeCompare(nameA);
-        });
-      case "experience-desc":
-        return sorted.sort((a, b) => b.yearsOfExperience - a.yearsOfExperience);
-      case "experience-asc":
-        return sorted.sort((a, b) => a.yearsOfExperience - b.yearsOfExperience);
-      case "city-asc":
-        return sorted.sort((a, b) => a.city.localeCompare(b.city));
-      default:
-        return sorted;
-    }
-  }
-
   useEffect(() => {
     fetchAdvocates(searchTerm, yearsFilter, titleFilter, currentPage).then((result) => {
       const sorted = sortAdvocates(result.advocates || [], sortBy);
@@ -326,56 +208,30 @@ export default function Home() {
   return (
     <Main>
       <Container>
-        <HeaderSection>
-          <TitleSection>
-            <Title>
-              Solace Advocates
-            </Title>
-            <Description>
-              Find an advocate who will help untangle your healthcare—covered by Medicare.
-            </Description>
-          </TitleSection>
-          <StickySearchContainer>
-            <AdvocateSearch
-              searchTerm={searchTerm}
-              isLoading={isLoading}
-              yearsFilter={yearsFilter}
-              titleFilter={titleFilter}
-              sortBy={sortBy}
-              resultCount={totalResults}
-              onChange={onChange}
-              onYearsFilterChange={onYearsFilterChange}
-              onTitleFilterChange={onTitleFilterChange}
-              onSortByChange={onSortByChange}
-              onReset={onReset}
-            />
-          </StickySearchContainer>
-        </HeaderSection>
+        <PageHeader
+          searchTerm={searchTerm}
+          isLoading={isLoading}
+          yearsFilter={yearsFilter}
+          titleFilter={titleFilter}
+          sortBy={sortBy}
+          resultCount={totalResults}
+          onChange={onChange}
+          onYearsFilterChange={onYearsFilterChange}
+          onTitleFilterChange={onTitleFilterChange}
+          onSortByChange={onSortByChange}
+          onReset={onReset}
+        />
         <ContentSection>
           <AdvocateResults
             advocates={filteredAdvocates}
             isLoading={isLoading}
             error={error}
           />
-          {!isLoading && !error && totalPages > 1 && (
-            <PaginationContainer>
-              <PaginationButton
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </PaginationButton>
-              <PaginationInfo>
-                Page {currentPage} of {totalPages}
-              </PaginationInfo>
-              <PaginationButton
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </PaginationButton>
-            </PaginationContainer>
-          )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </ContentSection>
       </Container>
     </Main>
