@@ -20,12 +20,12 @@ const workSans = Work_Sans({
 
 export const metadata: Metadata = {
   title: "Solace Advocates - Find Your Healthcare Advocate",
-  description: "Find an advocate who will help untangle your healthcare—covered by Medicare. Search by name, specialty, location, and more.",
+  description: "Find an advocate who will help untangle your healthcare. Search by name, specialty, location, and more.",
   keywords: ["healthcare", "advocate", "medicare", "health insurance", "patient advocacy"],
   viewport: "width=device-width, initial-scale=1",
   openGraph: {
     title: "Solace Advocates - Find Your Healthcare Advocate",
-    description: "Find an advocate who will help untangle your healthcare—covered by Medicare.",
+    description: "Find an advocate who will help untangle your healthcare.",
     type: "website",
   },
 };

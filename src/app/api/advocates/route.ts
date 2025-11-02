@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const yearsFilter = searchParams.get("years") || "";
     const titleFilter = searchParams.get("title") || "";
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "100", 10);
+    const limit = parseInt(searchParams.get("limit") || "25", 10);
 
     searchTerm = searchTerm.trim().slice(0, 100);
 
@@ -64,18 +64,15 @@ export async function GET(request: Request) {
       conditions.push(eq(advocates.degree, titleFilter));
     }
 
-    let countQuery = db.select({ count: sql<number>`count(*)` }).from(advocates);
-    if (conditions.length > 0) {
-      countQuery = countQuery.where(and(...conditions)) as typeof countQuery;
-    }
-
-    let dataQuery = db.select().from(advocates);
-    if (conditions.length > 0) {
-      dataQuery = dataQuery.where(and(...conditions)) as typeof dataQuery;
-    }
-
     const offset = (page - 1) * limit;
-    dataQuery = dataQuery.limit(limit).offset(offset);
+
+    const countQuery = conditions.length > 0
+      ? db.select({ count: sql<number>`count(*)` }).from(advocates).where(and(...conditions))
+      : db.select({ count: sql<number>`count(*)` }).from(advocates);
+
+    const dataQuery = conditions.length > 0
+      ? db.select().from(advocates).where(and(...conditions)).limit(limit).offset(offset)
+      : db.select().from(advocates).limit(limit).offset(offset);
 
     const [countResult, data] = await Promise.all([
       countQuery,

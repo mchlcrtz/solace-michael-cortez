@@ -93,7 +93,7 @@ export function PageHeader({
           Solace Advocates
         </Title>
         <Description>
-          Find an advocate who will help untangle your healthcare—covered by Medicare.
+          Find an advocate who will help untangle your healthcare.
         </Description>
       </TitleSection>
       <StickySearchContainer>
