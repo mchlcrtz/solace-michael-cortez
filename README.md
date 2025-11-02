@@ -4,7 +4,13 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-Install dependencies
+1. Copy the environment file:
+
+```bash
+cp .env.example .env
+```
+
+2. Install dependencies
 
 ```bash
 npm i
